@@ -1,0 +1,85 @@
+<div xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+    <section class="jumbotron bg-light">
+            <div class="container">
+                <form action="/relations" method="POST">
+                    <div class="row">
+                        <div class="form-group mr-2 ">
+                        <label for="date">Датум на тргање:</label>
+                        <input type="date"
+                               class="form-control"
+                               id="date"
+                               name="date"
+                               required
+                               th:value="${date}"
+                               max="2090-05-03"
+                               placeholder="Внеси датум">
+                    </div>
+                    <div class="form-group mr-2 ">
+                        <label for="from">Од:</label>
+                        <input type="text"
+                               class="form-control"
+                               id="from"
+                               name="from"
+                               th:value="${from}"
+                               placeholder="Охрид">
+                    </div>
+                    <div class="form-group mr-2">
+                        <label for="to">До:</label>
+                        <input type="text"
+                               class="form-control"
+                               id="to"
+                               name="to"
+                               th:value="${to}"
+                               placeholder="Скопје">
+                    </div>
+                        <div class="form-group mr-2">
+                            <label for="agency">Агенција:</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="agency"
+                                   name="agency"
+                                   th:value="${agency}"
+                                   placeholder="Бисер Пром">
+                        </div>
+                    </div>
+                        <button id="submit" type="submit" class="btn btn-info">Пребарај</button>
+                </form>
+            </div>
+    </section>
+    <div class="container mb-4">
+        <div class="row">
+                <div class="col-12" th:if="${relations.size() > 0}">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th scope="col">Од</th>
+                                <th scope="col">До</th>
+                                <th scope="col">Време на тргање</th>
+                                <th scope="col">Време на стигање</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr  th:each="relation : ${relations}">
+                                <td th:text="${relation.getFromCity()}"></td>
+                                <td th:text="${relation.getToCity()}"></td>
+                                <td th:text="${#dates.format(relation.getDeparture(),'dd-MM-yyyy HH:mm')}"></td>
+                                <td th:text="${#dates.format(relation.getArrival(),'dd-MM-yyyy HH:mm')}"></td>
+                                <td>
+                                    <a th:href="@{'/relations/{id}' (id=${relation.getId()})}"
+                                       class="btn btn-sm btn-info">
+                                        Види детали
+                                    </a></td>
+
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+                <div class="col" th:if="${relations.size() == 0}">
+                    <p>Нема релации за избраниот датум.</p>
+                </div>
+    </div>
+</div>
+</div>

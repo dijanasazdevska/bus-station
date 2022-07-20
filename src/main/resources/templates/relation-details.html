@@ -1,0 +1,224 @@
+<html>
+<head>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"
+          integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ=="
+          crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
+            integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
+            crossorigin=""></script>
+
+</head>
+<body>
+<div class="container">
+    <div class="row" th:if="${relationThroughs.size() > 0}">
+
+    <div class="col mt-2">
+        <div class="card text-center">
+            <div class="card-body">
+                <div class="card-body">
+                    <div id="map"
+                         style="border:0; height:200px">
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <form class="text-left"  th:method="POST">
+                        <p>Ве молам одберете на мапата од која до која локација сакате да патувате.</p>
+                        <div class="form-group mr-2">
+                            <label for="agency">Агенција:</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="agency"
+                                   name="agency"
+                                   th:value="${agency}"
+                                   placeholder="Бисер Пром">
+                        </div>
+                        <div th:text="${param.error}" class="text-danger"></div>
+                        <input type="text" name="fromCity" id="fromCity" hidden>
+                        <input  type="text" name="toCity" id = "toCity" hidden>
+                        <button class="btn btn-info" id="submit" type="submit">Купи карта</button>
+                    </form>
+
+                </div>
+            </div>
+            <div class="card-footer">
+                </div>
+            </div>
+    </div>
+    <div class="col mt-2">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                    <caption>Редослед на станици</caption>
+                    <tr>
+                        <th scope="col">Град</th>
+                        <th scope="col">Земја</th>
+                        <th scope="col">Време на тргање</th>
+                        <th scope="col">Перон</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr  th:each="through : ${relationThroughs}">
+                        <td th:text="${through.getCity()}"></td>
+                        <td th:text="${through.getCountry()}"></td>
+                        <td th:text="${#dates.format(through.getDeparture(),'dd-MM-yyyy HH:mm')}"></td>
+                        <td th:text="${through.getGate()}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+    </div>
+    </div>
+    <div class="row">
+
+        <div class="col mt-2" th:if="${agencyPhones.size() > 0}">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                    <caption>Телефонски броеви на агенции</caption>
+                    <tr>
+                        <th scope="col">Агенција</th>
+                        <th scope="col">Телефонски број</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr  th:each="a : ${agencyPhones}">
+                        <td th:text="${a.getAgencyPhoneId().getAgency()}"></td>
+                        <td th:text="${a.getPhone()}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+        <div class="col mt-2" th:if="${driverPhones.size() > 0}">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                    <caption>Телефонски броеви на возачи</caption>
+                    <tr>
+                        <th scope="col">Возач</th>
+                        <th scope="col">Телефонски број</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr  th:each="d : ${driverPhones}">
+                        <td th:text="${d.getDriverPhoneId().getName()}+' '+${d.getDriverPhoneId().getSurname()}"></td>
+                        <td th:text="${d.getPhone()}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+    <div class="row" th:if="${relationThroughs.size() == 0}">
+        <div class="text-danger">Релацијата не постои. Ве молам вратете се на страната со релации.</div>
+    </div>
+</div>
+<script th:inline="javascript">
+    var map = L.map('map').setView([41.6086, 21.7453], 5);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    var greenIcon = new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+    var blueIcon = new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+    var fromCity = [[${fromCity}]]
+    var toCity = [[${toCity}]]
+
+    function onMarkerClick(e){
+        if(fromCity == null){
+           fromCity = e.target.options.through
+
+            marker = L.marker(e.latlng, {
+                icon: greenIcon,
+                through: fromCity
+            }).addTo(map)
+
+            var popup = L.popup()
+                .setLatLng(e.latlng)
+                .setContent(e.target.options.through.city)
+                .openOn(map);
+        }
+        else if(toCity == null){
+            toCity = e.target.options.through
+            if(toCity.order  === fromCity.order){
+                toCity = null;
+                return
+            }
+            marker = L.marker(e.latlng, {
+                icon: greenIcon,
+                through: toCity
+            }).addTo(map)
+
+            var popup = L.popup()
+                .setLatLng(e.latlng)
+                .setContent(e.target.options.through.city)
+                .openOn(map);
+
+
+            if(fromCity.order > toCity.order)
+            {
+                temp = fromCity
+                fromCity = toCity
+                toCity = temp
+
+            }
+        }
+        else {
+            for( var r of [[${relationThroughs}]]){
+                var marker = L.marker([r.latitude,r.longitude], {
+                    through: r,
+                    icon: blueIcon
+                }).addTo(map)
+                marker.on('click', onMarkerClick)
+            }
+            fromCity = e.target.options.through
+
+            marker = L.marker(e.latlng, {
+                icon: greenIcon,
+                through: fromCity
+            }).addTo(map)
+
+            var popup = L.popup()
+                .setLatLng(e.latlng)
+                .setContent(e.target.options.through.city)
+                .openOn(map);
+
+            toCity = null
+        }
+        document.getElementById("fromCity").value = fromCity?.city
+        document.getElementById("toCity").value = toCity?.city
+        console.log(fromCity)
+        console.log(toCity)
+    }
+    for( var r of [[${relationThroughs}]]){
+       var marker = L.marker([r.latitude,r.longitude], {
+           through: r
+       }).addTo(map)
+        marker.on('click', onMarkerClick)
+    }
+    var polyline = L.polyline([[${relationThroughs}]].map(r => [r.latitude, r.longitude])).addTo(map);
+
+    // zoom the map to the polyline
+    map.fitBounds(polyline.getBounds());
+
+</script>
+</body>
+</html>

@@ -1,0 +1,162 @@
+<head>
+    <style>
+        .stepper-wrapper {
+            font-family: Arial;
+            margin-top: 50px;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .stepper-item {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+
+        @media (max-width: 768px) {
+            font-size: 12px;
+        }
+        }
+
+        .stepper-item::before {
+            position: absolute;
+            content: "";
+            border-bottom: 2px solid #ccc;
+            width: 100%;
+            top: 20px;
+            left: -50%;
+            z-index: 2;
+        }
+
+        .stepper-item::after {
+            position: absolute;
+            content: "";
+            border-bottom: 2px solid #ccc;
+            width: 100%;
+            top: 20px;
+            left: 50%;
+            z-index: 2;
+        }
+
+        .stepper-item .step-counter {
+            position: relative;
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ccc;
+            margin-bottom: 6px;
+        }
+
+        .stepper-item.active {
+            font-weight: bold;
+        }
+
+        .stepper-item.completed .step-counter {
+            background-color: darkturquoise;
+        }
+
+        .stepper-item.completed::after {
+            position: absolute;
+            content: "";
+            border-bottom: 2px solid darkturquoise;
+            width: 100%;
+            top: 20px;
+            left: 50%;
+            z-index: 3;
+        }
+
+        .stepper-item:first-child::before {
+            content: none;
+        }
+        .stepper-item:last-child::after {
+            content: none;
+        }
+
+    </style>
+</head>
+<body>
+<section class="jumbotron bg-light">
+    <div class="container">
+        <form action="/cards" method="POST">
+            <div class="row">
+                <div class="form-group mr-2 ">
+                    <label for="date">Датум на тргање:</label>
+                    <input type="date"
+                           class="form-control"
+                           id="date"
+                           name="date"
+                           required
+                           th:value="${date}"
+                           max="2090-05-03"
+                           placeholder="Внеси датум">
+                </div>
+                <div class="form-group mr-2 ">
+                    <label for="from">Од:</label>
+                    <input type="text"
+                           class="form-control"
+                           id="from"
+                           name="from"
+                           th:value="${from}"
+                           placeholder="Охрид">
+                </div>
+                <div class="form-group mr-2">
+                    <label for="to">До:</label>
+                    <input type="text"
+                           class="form-control"
+                           id="to"
+                           name="to"
+                           th:value="${to}"
+                           placeholder="Скопје">
+                </div>
+                </div>
+            <button id="submit" type="submit" class="btn btn-info">Пребарај</button>
+        </form>
+    </div>
+</section>
+<div class="container">
+
+    <div class="row mb-2 mt-2" th:if="${cards.size() > 0}"th:each="card: ${cards}">
+    <div class="col-4">
+        <div  class="card">
+        <div class="card-header bg-info">
+            <h5 th:text="'Карта бр. '+${card.getCardId()}"></h5>
+        </div>
+        <div class="card-body">
+            <h5 class="card-title" th:text="${card.getFromCity()}+' - '+${card.getToCity()}"></h5>
+            <div class="card-text">
+                <p th:text="'Патник: '+${card.getName()}+' '+${card.getSurname()}"></p>
+                <p th:text="'Корисничко име: '+${card.getUsername()}"></p>
+                <p th:text="'Перон: '+${card.getGate()}"></p>
+                <p th:text="'Релација: '+${card.getRelationFromCity()}+' - '+${card.getRelationToCity()}"></p>
+                <p th:text="'Датум на тргање: '+${#dates.format(relation.getDeparture(),'dd-MM-yyyy HH:mm')}"></p>
+                <p th:text="'Цена: '+${card.getPrice()}+' ден'"></p>
+
+            </div>
+        </div>
+    </div>
+    </div>
+        <div class="col-8">
+            <div class="stepper-wrapper">
+                <div th:each="t,iter: ${card.getRelationThroughs()}" class="stepper-item completed">
+                    <div class="step-counter" th:text="${iter.index+1}"></div>
+                    <div class="step-name" th:text="${t.getCity()}">First</div>
+                </div>
+
+        </div>
+
+
+    </div>
+    </div>
+    <div class="row mb-2 mt-2" th:if="${cards.size() == 0 and param.error == null}">
+        <p>Не постојат карти со дадените филтри.</p>
+
+    </div>
+    <div th:text="${param.error}" class="text-danger"></div>
+</div>
+</div>
+</body>
